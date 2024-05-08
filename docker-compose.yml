@@ -1,0 +1,76 @@
+version: "3"
+
+networks:
+  radiabee:
+    driver: bridge
+
+volumes:
+  radiabee-cache:
+
+services:
+  radiabee-nginx:
+    image: jsdc2021/radiabee-nginx:b0.20240508.1
+    container_name: radiabee-nginx
+    ports:
+      - ${service_port}:80
+    networks:
+      - radiabee
+    depends_on:
+      - radiabee-backend
+
+  # radiabee-client:
+  #   image: jsdc2021/radiabee-client-next:b0.20240425.57
+  #   container_name: radiabee-client
+  #   ports:
+  #     - 8087:3000
+  #   networks:
+  #     - radiabee
+  #   depends_on:
+  #     - radiabee-backend
+
+  radiabee-backend:
+    image: jsdc2021/radiabee-backend-nest:b0.20240508.3
+    container_name: radiabee-backend
+    entrypoint: ["/app/entrypoint/entrypoint.sh"]
+    networks:
+      - radiabee
+    volumes:
+      - ./storage:/app/storage
+    depends_on:
+      - radiabee-postgres
+
+  radiabee-cache:
+    image: redis:latest
+    container_name: radiabee-cache
+    command: redis-server --save 20 1 --loglevel warning --requirepass ${redis_password}
+    volumes:
+      - radiabee-cache:/data
+    networks:
+      - radiabee
+
+  radiabee-postgres:
+    image: postgis/postgis:14-3.3
+    container_name: radiabee-postgres
+    environment:
+      POSTGRES_USER: ${postgres_user}
+      POSTGRES_PASSWORD: ${postgres_password}
+      APP_DB_USER: ${postgres_user}
+      APP_DB_PASS: ${postgres_password}
+      APP_DB_NAME: ${postgres_database}
+      PGDATA: /data/postgres
+    volumes:
+      - ./database-entrypoint:/docker-entrypoint-initdb.d/
+      - ./radiabee-postgres:/data/postgres
+    networks:
+      - radiabee
+
+  radiabee-pgadmin:
+    image: dpage/pgadmin4
+    container_name: radiabee-pgadmin
+    environment:
+      PGADMIN_DEFAULT_EMAIL: ${pgadmin_user}@gmail.com
+      PGADMIN_DEFAULT_PASSWORD: ${pgadmin_password}
+    ports:
+      - "${pgadmin_port}:80"
+    networks:
+      - radiabee
