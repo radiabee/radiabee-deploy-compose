@@ -9,7 +9,7 @@ volumes:
 
 services:
   radiabee-nginx:
-    image: ccistech/radiabee-nginx:b0.20240508.1
+    image: ccistech/radiabee-nginx:b0.20240602.m
     container_name: radiabee-nginx
     ports:
       - ${service_port}:80
@@ -18,18 +18,16 @@ services:
     depends_on:
       - radiabee-backend
 
-  # radiabee-client:
-  #   image: ccistech/radiabee-client-next:b0.20240425.57
-  #   container_name: radiabee-client
-  #   ports:
-  #     - 8087:3000
-  #   networks:
-  #     - radiabee
-  #   depends_on:
-  #     - radiabee-backend
+  radiabee-client:
+    image: ccistech/radiabee-client-next:b0.20240602.m
+    container_name: radiabee-client
+    networks:
+      - radiabee
+    depends_on:
+      - radiabee-backend
 
   radiabee-backend:
-    image: ccistech/radiabee-backend-nest:b0.20240508.3
+    image: ccistech/radiabee-backend-nest:b0.20240602.m
     container_name: radiabee-backend
     entrypoint: ["/app/entrypoint/entrypoint.sh"]
     networks:
