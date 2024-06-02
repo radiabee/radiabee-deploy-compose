@@ -27,7 +27,7 @@ services:
       - radiabee-backend
 
   radiabee-backend:
-    image: ccistech/radiabee-backend-nest:b0.20240602.m
+    image: ccistech/radiabee-backend-nest:b0.20240206.m
     container_name: radiabee-backend
     entrypoint: ["/app/entrypoint/entrypoint.sh"]
     networks:
